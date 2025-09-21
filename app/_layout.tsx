@@ -1,5 +1,6 @@
 import { Stack, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { AuthProvider } from "@/lib/auth-context";
 
 function RouteGuard({children} :{ children : React.ReactNode }) {
   const router = useRouter();
@@ -20,11 +21,13 @@ function RouteGuard({children} :{ children : React.ReactNode }) {
 
 export default function RootLayout() {
   return (
-    <RouteGuard>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
-        <Stack.Screen name="auth" options={{title : "Auth"}}/>
-      </Stack>
-    </RouteGuard>
+    <AuthProvider>
+      <RouteGuard>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
+          <Stack.Screen name="auth" options={{title : "Auth"}}/>
+        </Stack>
+      </RouteGuard>
+    </AuthProvider>
   );
 }

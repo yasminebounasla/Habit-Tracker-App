@@ -1,6 +1,8 @@
 import { KeyboardAvoidingView, Platform, View, StyleSheet } from "react-native";
 import { Text, TextInput, Button, useTheme } from "react-native-paper";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "expo-router";
 
 export default function AuthScreen() {
     const [isSignUp, setIsSignUp] = useState<boolean>(false);
@@ -8,7 +10,9 @@ export default function AuthScreen() {
     const [password, setPassword] = useState<string>("");
     const [error, setError] = useState<string | null>("");
 
+    const {signIn, signUp} = useAuth();
     const theme = useTheme();
+    const router = useRouter();
 
     const handleAuth = async () => {
         if(!email || !password) {
@@ -21,6 +25,21 @@ export default function AuthScreen() {
             return;
         }
         setError(null)
+
+        if(isSignUp) {
+            const error = await signUp(email, password);
+            if(error) {
+                setError(error);
+                return;
+            }
+        } else {
+            const error = await signIn(email, password)
+            if(error) {
+                setError(error);
+                return;
+            }
+            router.replace("/")
+        }
     }
 
     const handleSwitchMode = () => {
@@ -49,7 +68,7 @@ export default function AuthScreen() {
             <TextInput 
                label="Password"
                autoCapitalize="none"
-               keyboardType="email-address"
+               secureTextEntry
                mode="outlined"
                style={styles.input}
                onChangeText={setPassword}
