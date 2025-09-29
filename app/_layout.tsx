@@ -1,7 +1,7 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
-import { PaperProvider } from "react-native-paper";
+import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 function RouteGuard({children} :{ children : React.ReactNode }) {
@@ -26,10 +26,11 @@ function RouteGuard({children} :{ children : React.ReactNode }) {
   return <>{children}</>;
 }
 
+
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <PaperProvider>
+      <PaperProvider theme={MD3LightTheme}>
         <SafeAreaProvider>
           <RouteGuard>
             <Stack>
