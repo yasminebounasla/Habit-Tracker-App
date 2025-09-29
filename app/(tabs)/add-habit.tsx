@@ -7,49 +7,48 @@ import { useAuth } from "@/lib/auth-context";
 import { ID } from "react-native-appwrite";
 import { useRouter } from "expo-router";
 
-const FREQUENCIES = ["daily", "weekly", "monthly"];
-type Frequency = (typeof FREQUENCIES)[number];
-const {user} = useAuth();
-const router = useRouter();
-const theme = useTheme();
-
-const [title, setTitle] = useState<String>("");
-const [description, setDescription] = useState<String>("");
-const [frequency, setFrequency] = useState<Frequency>("daily");
-const [error, setError] = useState<String>("");
-
-
-const handleSubmit = async () => {
-    if(!user) return;
-
-    try {
-        await databases.createDocument(
-            DATABASE_ID, 
-            HABITS_COLLECTION_ID, 
-            ID.unique(),
-            {
-                user_id : user.$id,
-                title,
-                description,
-                frequency,
-                streak_count: 0,
-                last_completed: new Date().toISOString(),
-                $createdAt: new Date().toISOString()   
-            }
-        );
-
-        router.back() 
-    } catch(err) {
-        if(err instanceof Error) {
-            setError(err.message);
-            return;
-        } 
-
-        setError("There was an error creating the habit");
-    }
-}
-
 export default function AddHabitScreen() {
+    const FREQUENCIES = ["daily", "weekly", "monthly"];
+    type Frequency = (typeof FREQUENCIES)[number];
+    const {user} = useAuth();
+    const router = useRouter();
+    const theme = useTheme();
+
+    const [title, setTitle] = useState<String>("");
+    const [description, setDescription] = useState<String>("");
+    const [frequency, setFrequency] = useState<Frequency>("daily");
+    const [error, setError] = useState<String>("");
+
+
+    const handleSubmit = async () => {
+        if(!user) return;
+
+        try {
+            await databases.createDocument(
+                DATABASE_ID, 
+                HABITS_COLLECTION_ID, 
+                ID.unique(),
+                {
+                    user_id : user.$id,
+                    title,
+                    description,
+                    frequency,
+                    streak_count: 0,
+                    last_completed: new Date().toISOString(),
+                    $createdAt: new Date().toISOString()   
+                }
+            );
+
+            router.back() 
+        } catch(err) {
+            if(err instanceof Error) {
+                setError(err.message);
+                return;
+            } 
+
+            setError("There was an error creating the habit");
+        }
+    }
     return (
         <View style={styles.container}>
             <TextInput 
