@@ -1,7 +1,7 @@
 import { Label } from "@react-navigation/elements";
 import { View, Text, StyleSheet } from "react-native";
 import { DATABASE_ID, databases, HABITS_COLLECTION_ID } from "@/lib/appwrite";
-import { SegmentedButtons, TextInput, Button } from "react-native-paper";
+import { SegmentedButtons, TextInput, Button, useTheme } from "react-native-paper";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { ID } from "react-native-appwrite";
@@ -10,32 +10,43 @@ import { useRouter } from "expo-router";
 const FREQUENCIES = ["daily", "weekly", "monthly"];
 type Frequency = (typeof FREQUENCIES)[number];
 const {user} = useAuth();
-const router = useRouter()
+const router = useRouter();
+const theme = useTheme();
 
 const [title, setTitle] = useState<String>("");
 const [description, setDescription] = useState<String>("");
 const [frequency, setFrequency] = useState<Frequency>("daily");
+const [error, setError] = useState<String>("");
 
 
 const handleSubmit = async () => {
     if(!user) return;
 
-    await databases.createDocument(
-        DATABASE_ID, 
-        HABITS_COLLECTION_ID, 
-        ID.unique(),
-        {
-            user_id : user.$id,
-            title,
-            description,
-            frequency,
-            streak_count: 0,
-            last_completed: new Date().toISOString(),
-            $createdAt: new Date().toISOString()   
-        }
-    );
+    try {
+        await databases.createDocument(
+            DATABASE_ID, 
+            HABITS_COLLECTION_ID, 
+            ID.unique(),
+            {
+                user_id : user.$id,
+                title,
+                description,
+                frequency,
+                streak_count: 0,
+                last_completed: new Date().toISOString(),
+                $createdAt: new Date().toISOString()   
+            }
+        );
 
-    router.back()
+        router.back() 
+    } catch(err) {
+        if(err instanceof Error) {
+            setError(err.message);
+            return;
+        } 
+
+        setError("There was an error creating the habit");
+    }
 }
 
 export default function AddHabitScreen() {
@@ -70,6 +81,7 @@ export default function AddHabitScreen() {
             >
                 Add Habit
             </Button>
+            {error && <Text style={{ color: theme.colors.error }}> {error}</Text>}
         </View>
     )
 }
