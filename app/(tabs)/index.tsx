@@ -27,7 +27,7 @@ export default function Index() {
     }
   }
 
-  // This will refetch habits every time you navigate back to this screen
+  
   useFocusEffect(
     useCallback(() => {
       fetchHabits();
@@ -35,9 +35,9 @@ export default function Index() {
   );
 
   return (
-    <View style={styles.view}>
-      <View>
-        <Text variant="headlineSmall">
+    <View>
+      <View style={styles.header}>
+        <Text variant="headlineSmall" style={styles.header}>
           Today's Habits
         </Text>
         <Button mode="text" onPress={signOut} icon={"logout"}>
@@ -45,22 +45,36 @@ export default function Index() {
         </Button>
       </View>
       {habits.length === 0 ? (
-        <View>
-          <Text>No Habits Yet. Add Your First Habit!</Text>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No Habits Yet. Add Your First Habit!</Text>
         </View>
       ) : (
         habits.map((habit, key) => (
-          <View key={key}>
-            <Text>{habit.title}</Text>
-            <Text>{habit.description}</Text>
-            <View>
-              <MaterialCommunityIcons
-                name="fire"
-                size={18}
-                color="#ff9800"
-              />
+          <Surface style={styles.card} >
+            <View key={key} style={styles.cardContent}>
+              <Text style={styles.cardTitle}>{habit.title}</Text>
+              <Text style={styles.cardDescription}>{habit.description}</Text>
+              <View style={styles.cardFooter}>
+                <View style={styles.streakBadge}>
+                  <MaterialCommunityIcons
+                    name="fire"
+                    size={18}
+                    color="#ff9800"
+                  />
+                  <Text style={styles.streakText}>
+                    {habit.streak_count} day streak
+                  </Text> 
+                </View>
+                <View style={styles.frequencyBadge}>
+                  <Text style={styles.frequencyText}>
+                    {" "}
+                    {habit.frequency.charAt(0).toUpperCase() +
+                      habit.frequency.slice(1)}
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
+          </Surface>
         ))
       )}
     </View>
@@ -68,9 +82,107 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  view: {
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  title: {
+    fontWeight: "bold",
+  },
+
+  card: {
+    marginBottom: 18,
+    borderRadius: 18,
+    backgroundColor: "#f7f2fa",
+    shadowColor: "#454545ff",
+    shadowOffset: { width: 0, height:2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginRight: 15,
+    marginLeft : 15,
+  },
+
+  cardCompleted: {
+    opacity: 0.6,
+  },
+  cardContent: {
+    padding: 17,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 4,
+    color: "#22223b",
+  },
+  cardDescription: {
+    fontSize: 15,
+    marginBottom: 16,
+    color: "#6c6c80",
+  },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  streakBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff3e0",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  streakText: {
+    marginLeft: 6,
+    color: "#ff9800",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  frequencyBadge: {
+    backgroundColor: "#ede7f6",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  frequencyText: {
+    color: "#7c4dff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  emptyState: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  }
-})
+  },
+  emptyStateText: {
+    color: "#666666",
+  },
+  swipeActionLeft: {
+    justifyContent: "center",
+    alignItems: "flex-start",
+    flex: 1,
+    backgroundColor: "#e53935",
+    borderRadius: 18,
+    marginBottom: 18,
+    marginTop: 2,
+    paddingLeft: 16,
+  },
+  swipeActionRight: {
+    justifyContent: "center",
+    alignItems: "flex-end",
+    flex: 1,
+    backgroundColor: "#4caf50",
+    borderRadius: 18,
+    marginBottom: 18,
+    marginTop: 2,
+    paddingRight: 16,
+  },
+});
