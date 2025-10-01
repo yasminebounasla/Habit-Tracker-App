@@ -25,12 +25,37 @@ export default function Index() {
       console.error(err);
     }
   }
-  
+
   useEffect(
-    useCallback(() => {
-      fetchHabits();
-    }, [user])
-  );
+    () => {
+      if (user) {
+        const habitsChannel = `databases.${DATABASE_ID}.collections.${HABITS_COLLECTION_ID}.documents`;
+        const habitsSubscription = client.subscribe(
+          habitsChannel,
+          (response: RealTimeResponse) => {
+            if (
+              response.events.includes(
+                "databases.*.collections.*.documents.*.create"
+              )
+            ) {
+              fetchHabits();
+            } else if (
+              response.events.includes(
+                "databases.*.collections.*.documents.*.update"
+              )
+            ) {
+              fetchHabits();
+            } else if (
+              response.events.includes(
+                "databases.*.collections.*.documents.*.delete"
+              )
+            ) {
+              fetchHabits();
+            }
+          }
+        );
+      }
+    }, [user]);
 
   return (
     <ScrollView style={styles.scrollContainer}>
