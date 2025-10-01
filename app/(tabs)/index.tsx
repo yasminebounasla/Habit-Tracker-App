@@ -1,7 +1,7 @@
 import { View, StyleSheet, ScrollView } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
 import { useAuth } from "@/lib/auth-context";
-import { client, DATABASE_ID, databases, HABITS_COLLECTION_ID, RealTimeResponse } from "@/lib/appwrite";
+import { client, DATABASE_ID, databases, HABITS_COLLECTION_ID, RealtimeResponse } from "@/lib/appwrite";
 import { Query } from "react-native-appwrite";
 import { useState, useEffect } from "react";
 import { Habit } from "@/types/database.type";
@@ -28,11 +28,11 @@ export default function Index() {
 
   useEffect(
     () => {
-      if (user) {
+      if(user) {
         const habitsChannel = `databases.${DATABASE_ID}.collections.${HABITS_COLLECTION_ID}.documents`;
         const habitsSubscription = client.subscribe(
           habitsChannel,
-          (response: RealTimeResponse) => {
+          (response: RealtimeResponse) => {
             if (
               response.events.includes(
                 "databases.*.collections.*.documents.*.create"
@@ -54,6 +54,12 @@ export default function Index() {
             }
           }
         );
+      
+        fetchHabits();
+
+        return () => {
+          habitsSubscription();
+        }
       }
     }, [user]);
 
