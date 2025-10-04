@@ -64,7 +64,15 @@ export default function Index() {
           habitsSubscription();
         }
       }
-    }, [user]);
+  }, [user]);
+
+  const handleDeleteHabit = async (id: string) => {
+    try {
+      await databases.deleteDocument(DATABASE_ID, HABITS_COLLECTION_ID, id);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
     
   const renderRightActions = (habitId: string) => (
