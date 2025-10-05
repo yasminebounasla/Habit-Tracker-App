@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { client, COMPLETIONS_COLLECTION_ID, DATABASE_ID, databases, HABITS_COLLECTION_ID, RealtimeResponse } from "@/lib/appwrite";
 import { ID, Query } from "react-native-appwrite";
 import { useState, useEffect, useRef } from "react";
-import { Habit } from "@/types/database.type";
+import { Habit, HabitCompletion } from "@/types/database.type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCallback } from "react";
 import { Swipeable } from "react-native-gesture-handler";
@@ -12,8 +12,9 @@ import { Swipeable } from "react-native-gesture-handler";
 export default function Index() {
   const { signOut, user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [completedHabits, setCompletedHabits] = useState<string[]>();
 
-   const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
+  const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
 
   const fetchHabits = async () => {
     try {
@@ -28,6 +29,7 @@ export default function Index() {
       console.error(err);
     }
   }
+  
 
   useEffect(
     () => {
@@ -65,6 +67,25 @@ export default function Index() {
         }
       }
   }, [user]);
+
+  const fetchTodayCompletions = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        COMPLETIONS_COLLECTION_ID,
+        [
+          Query.equal("user_id", user?.$id ?? ""),
+          Query.greaterThanEqual("completed_at", today.toISOString()),
+        ]
+      );
+      const completions = response.documents as unknown as HabitCompletion[];
+      setCompletedHabits(completions.map((c) => c.habit_id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleDeleteHabit = async (id: string) => {
     try {
