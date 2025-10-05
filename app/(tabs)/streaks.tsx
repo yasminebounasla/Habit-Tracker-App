@@ -91,6 +91,28 @@ export default function StreaksScreen() {
     }
   };
 
+  interface StreakData {
+    streak: number;
+    bestStreak: number;
+    total: number;
+  }
+
+  const getStreakData = (habitId: string): StreakData => {
+    const habitCompletions = completedHabits
+      ?.filter((c) => c.habit_id === habitId)
+      .sort(
+        (a, b) =>
+          new Date(a.completed_at).getTime() -
+          new Date(b.completed_at).getTime()
+      );
+
+    if (habitCompletions?.length === 0) {
+      return { streak: 0, bestStreak: 0, total: 0 };
+    }
+
+    return { streak, bestStreak, total };
+  };
+
     return (
         <View>
             <Text>Hello this is the Login page</Text>
