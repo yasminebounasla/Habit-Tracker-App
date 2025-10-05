@@ -110,8 +110,42 @@ export default function StreaksScreen() {
       return { streak: 0, bestStreak: 0, total: 0 };
     }
 
+    // build streak data
+    let streak = 0;
+    let bestStreak = 0;
+    let total = habitCompletions.length;
+
+    let lastDate: Date | null = null;
+    let currentStreak = 0;
+
+    habitCompletions?.forEach((c) => {
+      const date = new Date(c.completed_at);
+      if (lastDate) {
+        const diff =
+          (date.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (diff <= 1.5) {
+          currentStreak += 1;
+        } else {
+          currentStreak = 1;
+        }
+      } else {
+        currentStreak = 1;
+      }
+
+      if (currentStreak > bestStreak) bestStreak = currentStreak;
+      streak = currentStreak;
+      lastDate = date;
+    });
+
     return { streak, bestStreak, total };
   };
+
+  const habitStreaks = habits.map((habit) => {
+    const { streak, bestStreak, total } = getStreakData(habit.$id);
+    return { habit, bestStreak, streak, total };
+  });
+
 
     return (
         <View>
