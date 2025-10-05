@@ -125,13 +125,15 @@ export default function Index() {
     
   const renderRightActions = (habitId: string) => (
     <View style={styles.swipeActionRight}>
-      
+      {isHabitCompleted(habitId) ? (
+        <Text style={{ color: "#fff" }}> Completed!</Text>
+      ) : (
         <MaterialCommunityIcons
           name="check-circle-outline"
           size={32}
           color={"#fff"}
         />
-      
+      )}
     </View>
   );
 
@@ -144,6 +146,9 @@ export default function Index() {
       />
     </View>
   );
+
+  const isHabitCompleted = (habitId: string) =>
+    completedHabits?.includes(habitId);
 
   return (
     <ScrollView style={styles.scrollContainer}>
@@ -182,7 +187,12 @@ export default function Index() {
               }}
           
             >
-              <Surface style={styles.card} key={key}>
+              <Surface style={
+                [
+                  styles.card,
+                  isHabitCompleted(habit.$id) && styles.cardCompleted,
+                ]
+              } key={key}>
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle}>{habit.title}</Text>
                   <Text style={styles.cardDescription}>{habit.description}</Text>
