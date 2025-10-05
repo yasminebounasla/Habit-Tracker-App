@@ -12,7 +12,7 @@ import { Swipeable } from "react-native-gesture-handler";
 export default function Index() {
   const { signOut, user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
-  const [completedHabits, setCompletedHabits] = useState<string[]>();
+  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
 
   const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
 
@@ -29,7 +29,25 @@ export default function Index() {
       console.error(err);
     }
   }
-  
+
+  const fetchTodayCompletions = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        COMPLETIONS_COLLECTION_ID,
+        [
+          Query.equal("user_id", user?.$id ?? ""),
+          Query.greaterThanEqual("completed_at", today.toISOString()),
+        ]
+      );
+      const completions = response.documents as unknown as HabitCompletion[];
+      setCompletedHabits(completions.map((c) => c.habit_id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(
     () => {
@@ -61,31 +79,13 @@ export default function Index() {
         );
       
         fetchHabits();
+        fetchTodayCompletions();
 
         return () => {
           habitsSubscription();
         }
       }
   }, [user]);
-
-  const fetchTodayCompletions = async () => {
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        COMPLETIONS_COLLECTION_ID,
-        [
-          Query.equal("user_id", user?.$id ?? ""),
-          Query.greaterThanEqual("completed_at", today.toISOString()),
-        ]
-      );
-      const completions = response.documents as unknown as HabitCompletion[];
-      setCompletedHabits(completions.map((c) => c.habit_id));
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const handleDeleteHabit = async (id: string) => {
     try {
@@ -117,12 +117,13 @@ export default function Index() {
         streak_count: habit.streak_count + 1,
         last_completed: currentDate,
       });
+
+      fetchTodayCompletions();
     } catch (error) {
       console.error(error);
     }
   };
 
-    
   const renderRightActions = (habitId: string) => (
     <View style={styles.swipeActionRight}>
       {isHabitCompleted(habitId) ? (
@@ -154,7 +155,7 @@ export default function Index() {
     <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text variant="headlineSmall" style={styles.header}>
+          <Text variant="headlineSmall" style={styles.title}>
             Today's Habits
           </Text>
           <Button mode="text" onPress={signOut} icon={"logout"}>
@@ -192,7 +193,7 @@ export default function Index() {
                   styles.card,
                   isHabitCompleted(habit.$id) && styles.cardCompleted,
                 ]
-              } key={key}>
+              }>
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle}>{habit.title}</Text>
                   <Text style={styles.cardDescription}>{habit.description}</Text>
